@@ -1,0 +1,346 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  CUSTOMER
+  CAREGIVER
+}
+
+enum CaregiverType {
+  DOCTOR
+  NURSE
+  BABYSITTER
+  PHYSIOTHERAPIST
+  ELDERLY_CARE
+  OTHER
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum MedicalRecordType {
+  IMAGE
+  PDF
+  TEXT
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
+enum DayOfWeek {
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
+model Admin {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  email    String @unique
+  password String
+  name     String
+  role     String @default("ADMIN")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  email         String     @unique
+  password      String
+  role          UserRole
+  name          String
+  profileImage  String?
+  contactNumber String?
+  address       Address?
+  preferences   String[]
+  customer      Customer?
+  caregiver     Caregiver?
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Address {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @unique @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  street  String
+  city    String
+  state   String
+  zipCode String
+  country String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Customer {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @unique @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  medicalRecords MedicalRecord[]
+  appointments   Appointment[]
+  reviews        Review[]
+  conversations  Conversation[]  @relation("CustomerConversations")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MedicalRecord {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  customerId String   @db.ObjectId
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?
+  type        MedicalRecordType
+  fileUrl     String?
+  textData    String?
+  recordDate  DateTime
+  uploadDate  DateTime          @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+}
+
+model Caregiver {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @unique @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type            CaregiverType
+  description     String
+  bannerImage     String?
+  specializations String[]
+  experience      Int
+  languages       String[]
+
+  verificationStatus    VerificationStatus @default(PENDING)
+  verificationDocuments String[]
+  verifiedAt            DateTime?
+  verifiedBy            String?            @db.ObjectId
+  rejectionReason       String?
+
+  charges          CaregiverCharges?
+  emergencyContact EmergencyContact?
+  availability     Availability[]
+  certificates     Certificate[]
+  appointments     Appointment[]
+  reviews          Review[]
+  conversations    Conversation[]    @relation("CaregiverConversations")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CaregiverCharges {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  caregiverId String    @unique @db.ObjectId
+  caregiver   Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+
+  hourlyRate   Float?
+  visitFee     Float?
+  currency     String  @default("INR")
+  isNegotiable Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Availability {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  caregiverId String    @db.ObjectId
+  caregiver   Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+
+  dayOfWeek   DayOfWeek
+  startTime   String // Format: "HH:mm"
+  endTime     String // Format: "HH:mm"
+  isAvailable Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([caregiverId])
+  @@index([dayOfWeek])
+}
+
+model Certificate {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  caregiverId String    @db.ObjectId
+  caregiver   Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+
+  title          String
+  issuingBody    String
+  issueDate      DateTime
+  expiryDate     DateTime?
+  certificateUrl String
+  verified       Boolean   @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([caregiverId])
+  @@index([verified])
+}
+
+model EmergencyContact {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  caregiverId String    @unique @db.ObjectId
+  caregiver   Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+
+  name          String
+  relationship  String
+  contactNumber String
+  email         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Appointment {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  customerId  String    @db.ObjectId
+  customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  caregiverId String    @db.ObjectId
+  caregiver   Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+
+  appointmentDate DateTime
+  startTime       String // Format: "HH:mm"
+  endTime         String // Format: "HH:mm"
+  duration        Int // Duration in minutes
+
+  status         AppointmentStatus @default(PENDING)
+  notes          String? // Customer notes
+  caregiverNotes String? // Caregiver notes after appointment
+
+  totalAmount Float
+  isPaid      Boolean @default(false)
+  paymentId   String?
+
+  cancellationReason String?
+  cancelledBy        String?   @db.ObjectId
+  cancelledAt        DateTime?
+
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+  @@index([caregiverId])
+  @@index([appointmentDate])
+  @@index([status])
+}
+
+model Review {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  customerId  String    @db.ObjectId
+  customer    Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  caregiverId String    @db.ObjectId
+  caregiver   Caregiver @relation(fields: [caregiverId], references: [id], onDelete: Cascade)
+
+  rating      Int // 1-5 stars
+  comment     String?
+  isAnonymous Boolean @default(false)
+
+  helpfulCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([caregiverId])
+  @@index([customerId])
+  @@index([rating])
+}
+
+model Conversation {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  customerId  String    @db.ObjectId
+  customer    Customer  @relation("CustomerConversations", fields: [customerId], references: [id], onDelete: Cascade)
+  caregiverId String    @db.ObjectId
+  caregiver   Caregiver @relation("CaregiverConversations", fields: [caregiverId], references: [id], onDelete: Cascade)
+
+  messages Message[]
+
+  lastMessageAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([customerId, caregiverId])
+  @@index([customerId])
+  @@index([caregiverId])
+  @@index([lastMessageAt])
+}
+
+model Message {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  conversationId String       @db.ObjectId
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  senderId   String   @db.ObjectId
+  senderRole UserRole
+
+  content     String
+  attachments String[]
+
+  status MessageStatus @default(SENT)
+  readAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+
+  title   String
+  message String
+  type    String // e.g., "APPOINTMENT", "MESSAGE", "REVIEW", "VERIFICATION"
+  isRead  Boolean @default(false)
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
