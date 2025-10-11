@@ -1,10 +1,20 @@
+import { Suspense } from "react";
+import { getQueryClient, trpc } from "@/trpc/server";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { Loader } from "@/components/usable/loader";
+import { ProfileView } from "@/components/profile/ui/profile.view";
+
 const Page = () => {
+
+    const queryClient = getQueryClient();
+    void queryClient.prefetchQuery(trpc.user.getProfile.queryOptions());
+
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="max-w-4xl mx-auto">
-                
-            </div>
-        </div>
+        <HydrationBoundary state={dehydrate(queryClient)} >
+            <Suspense fallback={<Loader/>}>
+                <ProfileView />
+            </Suspense>
+        </HydrationBoundary>
     )
 }
 

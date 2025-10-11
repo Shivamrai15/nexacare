@@ -5,6 +5,7 @@ import {
     createTRPCRouter,
 } from "@/trpc/init";
 import { db } from "@/lib/db";
+import { PersonalInfoSchema } from "./schema";
 
 export const userRouter = createTRPCRouter({
     getProfile : protectedProcedure.query(async({ctx})=>{
@@ -38,5 +39,36 @@ export const userRouter = createTRPCRouter({
         }
 
         return user;
+    }),
+    updatePersonalInfo : protectedProcedure.input(PersonalInfoSchema).mutation(async({ctx, input})=>{
+        const updatedUser = await db.user.update({
+            where : {
+                id : ctx.userId
+            },
+            data : {
+                name : input.name,
+                contactNumber : input.contactNumber,
+                bio : input.bio,
+                address : {
+                    upsert : {
+                        create : {
+                            street : input.street,
+                            city : input.city,
+                            state : input.state,
+                            zipCode : input.zipCode,
+                            country : input.country,
+                        },
+                        update : {
+                            street : input.street,
+                            city : input.city,
+                            state : input.state,
+                            zipCode : input.zipCode,
+                            country : input.country,
+                        }
+                    }
+                }
+            }
+        });
+        return updatedUser;
     })
 })

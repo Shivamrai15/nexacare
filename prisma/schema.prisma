@@ -75,6 +75,7 @@ model User {
   id            String     @id @default(auto()) @map("_id") @db.ObjectId
   email         String     @unique
   role          UserRole
+  bio           String?
   name          String
   password      String?
   contactNumber String?
@@ -152,6 +153,7 @@ model Caregiver {
   specializations String[]
   experience      Int
   languages       String[]
+  vectorId       String? @unique
 
   verificationStatus    VerificationStatus @default(PENDING)
   verificationDocuments String[]
