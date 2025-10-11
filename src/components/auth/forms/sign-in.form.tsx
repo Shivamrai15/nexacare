@@ -2,9 +2,12 @@
 
 import * as z from "zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useTRPC } from "@/trpc/client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginSchema } from "@/modules/auth/schemas";
+
 import {
     Form,
     FormControl,
@@ -16,10 +19,28 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+
 
 export const SignInForm = () => {
+
+    const trpc = useTRPC();
     const router = useRouter();
+
+    const loggedInUser = useMutation(trpc.auth.signIn.mutationOptions({
+        onSuccess : ()=>{
+            form.reset();
+            toast.success("Logged in successfully!");
+            router.push("/");
+        },
+        onError : (error) => {
+            if (error.message === "NEXT_REDIRECT"){
+                window.location.reload();
+                return;
+            }
+            toast.error(error.message || "Something went wrong. Please try again.");
+        }
+    }))
 
     const form = useForm<z.infer<typeof LoginSchema>>({
         resolver: zodResolver(LoginSchema),
@@ -32,12 +53,7 @@ export const SignInForm = () => {
     const { isSubmitting } = form.formState;
 
     const onSubmit = async (data : z.infer<typeof LoginSchema>) => {
-        try {
-
-        } catch (error) {
-            console.error("LOGIN FORM ERROR", error);
-            window.location.reload();
-        }
+        await loggedInUser.mutateAsync(data);
     }
 
     return (
