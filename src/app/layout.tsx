@@ -30,7 +30,7 @@ export default async function RootLayout({
                 <TRPCReactProvider>
 
                     <body
-                        className={`${font.className} antialiased`}
+                        className={`${font.className} antialiased relative`}
                     >
                         <Toaster
                             position="top-right"
