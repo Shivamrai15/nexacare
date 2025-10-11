@@ -1,11 +1,14 @@
+import Link from "next/link";
 
 
 const Page = () => {
     return (
         <div>
-            Nexacare
+            <Link href="/sign-in">
+                Login
+            </Link>
         </div>
     )
 }
 
-export default Page
+export default Page;
