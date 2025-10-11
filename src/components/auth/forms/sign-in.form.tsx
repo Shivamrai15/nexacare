@@ -4,7 +4,7 @@ import * as z from "zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoginSchema } from "@/schemas/signin.schema";
+import { LoginSchema } from "@/modules/auth/schemas";
 import {
     Form,
     FormControl,

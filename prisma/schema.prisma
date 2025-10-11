@@ -383,11 +383,11 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
-model Verification {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  identifier String
-  token      String
-  expires    DateTime
- 
-  @@unique([identifier, token])
+model VerificationToken {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  token   String
+  expires DateTime
+  email   String
+
+  @@index([email])
 }
