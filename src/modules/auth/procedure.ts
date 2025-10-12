@@ -90,7 +90,13 @@ export const authRouter = createTRPCRouter({
                 email : input.email,
                 name : input.name,
                 password : hashedPassword,
-                role : input.role
+                role : input.role,
+                caregiver : input.role === "CAREGIVER" ? {
+                    create : {}
+                } : undefined,
+                customer : input.role === "CUSTOMER" ? {
+                    create : {}
+                } : undefined
             },
             select : {
                 id : true,

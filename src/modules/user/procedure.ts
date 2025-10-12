@@ -5,7 +5,7 @@ import {
     createTRPCRouter,
 } from "@/trpc/init";
 import { db } from "@/lib/db";
-import { PersonalInfoSchema } from "./schema";
+import { MedicalRecordSchema, PersonalInfoSchema } from "./schema";
 
 export const userRouter = createTRPCRouter({
     getProfile : protectedProcedure.query(async({ctx})=>{
@@ -14,19 +14,19 @@ export const userRouter = createTRPCRouter({
                 id : ctx.userId
             },
             include : {
-                customer : ctx.userRole === "CUSTOMER" ? {
+                customer : {
                     include : {
                         medicalRecords : true,
                     }
-                } : false,
-                caregiver : ctx.userRole === "CAREGIVER" ? {
+                },
+                caregiver : {
                     include : {
                         availability : true,
                         certificates : true,
                         charges : true,
                         emergencyContact : true
                     }
-                } : false,
+                },
                 address : true,
             }
         });
@@ -70,5 +70,57 @@ export const userRouter = createTRPCRouter({
             }
         });
         return updatedUser;
+    }),
+    createMedicalRecord : protectedProcedure.input(MedicalRecordSchema).mutation(async({ctx, input})=>{
+        const medicalRecord =  await db.medicalRecord.create({
+            data: {
+                title: input.title,
+                description: input.description,
+                type: input.type,
+                recordDate: new Date(input.recordDate),
+                textData: input.textData,
+                fileUrl: input.fileUrl,
+                customer : {
+                    connect : {
+                        userId : ctx.userId
+                    }
+                }
+            }
+        });
+
+        if (!medicalRecord) {
+            throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Failed to add medical record",
+            });
+        }
+        return medicalRecord;
+    }),
+    deleteMedicalRecord : protectedProcedure.input(z.object({
+        recordId : z.string().min(1)
+    })).mutation(async({ctx, input})=>{
+        const record = await db.medicalRecord.findFirst({
+            where : {
+                id : input.recordId,
+                customer : {
+                    userId : ctx.userId
+                }
+            }
+        });
+
+        if (!record) {
+            throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Medical record not found",
+            });
+        }
+
+        await db.medicalRecord.delete({
+            where: {
+                id: input.recordId,
+            },
+        });
+
+        return { success: true };
     })
-})
+});
