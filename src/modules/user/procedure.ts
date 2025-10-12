@@ -14,6 +14,8 @@ import {
     ChargesSchema,
     AvailabilitySchema,
 } from "./schema";
+import { qdarnt } from "@/lib/qdrant";
+import { generateEmbeddings } from "@/lib/embedding";
 
 export const userRouter = createTRPCRouter({
     getProfile : protectedProcedure.query(async({ctx})=>{
@@ -152,8 +154,32 @@ export const userRouter = createTRPCRouter({
                 experience : input.experience,
                 languages : input.languages,
                 specializations : input.specializations,
+            },
+            include : {
+                user : {
+                    select : {
+                        name : true,
+                        address : true,
+                    }
+                }
             }
         });
+
+        const vectorId = updatedCaregiver.vectorId;
+        const textToEmbed = `${updatedCaregiver.user.name} ${updatedCaregiver.user.address?.city || ''} ${updatedCaregiver.user.address?.state || ''} ${input.specializations.join(' ')}`;
+        const embedding = await generateEmbeddings(textToEmbed);
+        
+        await qdarnt.upsert("caregiver_profile", {
+            points : [{
+                id : vectorId,
+                vector : embedding,
+                payload : {
+                    caregiverId : updatedCaregiver.id,
+                    userId : ctx.userId
+                }
+            }]
+        });
+
         return updatedCaregiver;
     }),
     createCertificate : protectedProcedure.input(CertificateSchema).mutation(async({ctx, input})=>{

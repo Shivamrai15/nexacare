@@ -532,7 +532,7 @@ export const AvailabilityForm = () => {
                             <Clock className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
                             <h3 className="text-lg font-semibold mb-2">No Availability Slots</h3>
                             <p className="text-sm text-muted-foreground">
-                                Add your available hours to let clients know when you're free
+                                Add your available hours to let clients know when you&apos;re free
                             </p>
                         </div>
                     ) : (

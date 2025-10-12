@@ -2,6 +2,8 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { TRPCError } from "@trpc/server";
+import { v4 as uuidv4 } from 'uuid';
+
 import {
     baseProcedure,
     createTRPCRouter,
@@ -92,7 +94,9 @@ export const authRouter = createTRPCRouter({
                 password : hashedPassword,
                 role : input.role,
                 caregiver : input.role === "CAREGIVER" ? {
-                    create : {}
+                    create : {
+                        vectorId : uuidv4()
+                    }
                 } : undefined,
                 customer : input.role === "CUSTOMER" ? {
                     create : {}

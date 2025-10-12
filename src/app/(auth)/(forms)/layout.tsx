@@ -1,10 +1,18 @@
+import { auth } from "@/lib/auth";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 
 interface Props {
     children: React.ReactNode;
 }
 
-const LayoutPage = ({ children }: Props) => {
+const LayoutPage = async ({ children }: Props) => {
+    
+    const session = await auth();
+    if (session) {
+        return redirect("/");
+    }
+    
     return (
         <div className="w-full h-full flex">
             <section className="w-1/2 max-md:hidden h-full p-6 lg:p-10">
