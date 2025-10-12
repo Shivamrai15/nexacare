@@ -42,3 +42,34 @@ export const EmergencyContactSchema = z.object({
     contactNumber: z.string().min(10, "Invalid contact number").max(15, "Contact number is too long"),
     email: z.email("Invalid email").optional().or(z.literal("")),
 });
+
+export const ChargesSchema = z.object({
+    hourlyRate: z.number().min(0, "Rate cannot be negative").optional(),
+    visitFee: z.number().min(0, "Fee cannot be negative").optional(),
+    currency: z.string(),
+    isNegotiable: z.boolean(),
+}).refine(
+    (data) => data.hourlyRate !== undefined || data.visitFee !== undefined,
+    {
+        message: "At least one rate (hourly or visit fee) must be provided",
+        path: ["hourlyRate"],
+    }
+);
+
+export const AvailabilitySchema = z.object({
+    dayOfWeek: z.enum(["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"]),
+    startTime: z.string().min(1, "Start time is required").regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format (HH:mm)"),
+    endTime: z.string().min(1, "End time is required").regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid time format (HH:mm)"),
+    isAvailable: z.boolean(),
+}).refine(
+    (data) => {
+        if (data.startTime && data.endTime) {
+            return data.startTime < data.endTime;
+        }
+        return true;
+    },
+    {
+        message: "End time must be after start time",
+        path: ["endTime"],
+    }
+);

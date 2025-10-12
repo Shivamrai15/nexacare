@@ -11,6 +11,8 @@ import {
     MedicalRecordSchema,
     CaregiverProfileSchema,
     EmergencyContactSchema,
+    ChargesSchema,
+    AvailabilitySchema,
 } from "./schema";
 
 export const userRouter = createTRPCRouter({
@@ -251,5 +253,92 @@ export const userRouter = createTRPCRouter({
             });
         }
         return emergencyContact;
+    }),
+    createUpdateCharges : protectedProcedure.input(ChargesSchema).mutation(async({ctx, input})=>{
+        const caregiver = await db.caregiver.findUnique({
+            where : {
+                userId : ctx.userId
+            },
+            select : {
+                id : true
+            }
+        });
+
+        if (!caregiver) {
+            throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Caregiver profile not found. Please complete your professional profile first.",
+            });
+        }
+
+        const charges = await db.caregiverCharges.upsert({
+            where : {
+                caregiverId : caregiver.id
+            },
+            create : {
+                hourlyRate : input.hourlyRate,
+                visitFee : input.visitFee,
+                currency : input.currency,
+                caregiverId : caregiver.id,
+                isNegotiable : input.isNegotiable,
+            },
+            update : {
+                hourlyRate : input.hourlyRate,
+                visitFee : input.visitFee,
+                currency : input.currency,
+                isNegotiable : input.isNegotiable,
+            }
+        })
+
+        if (!charges) {
+            throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Failed to save charges",
+            });
+        }
+        return charges;
+    }),
+    createAvailabilitySlot : protectedProcedure.input(AvailabilitySchema).mutation(async({ctx, input})=>{
+        const availability = await db.availability.create({
+            data : {
+                dayOfWeek : input.dayOfWeek,
+                startTime : input.startTime,
+                endTime : input.endTime,
+                caregiver : {
+                    connect : {
+                        userId : ctx.userId
+                    }
+                }
+            }
+        });
+        if (!availability) {
+            throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Failed to create availability slot",
+            });
+        }
+        return availability;
+    }),
+    deleteAvailabilitySlot : protectedProcedure.input(z.object({ slotId : z.string().min(1) })).mutation(async({ctx, input})=>{
+        const slot = await db.availability.findFirst({
+            where : {
+                id : input.slotId,
+                caregiver : {
+                    userId : ctx.userId
+                }
+            }
+        });
+        if (!slot) {
+            throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Availability slot not found",
+            });
+        }
+        await db.availability.delete({
+            where : {
+                id : input.slotId
+            }
+        });
+        return { success : true };
     })
 })

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { MedicalForm } from "../forms/medical.form";
 import { Preferences } from "../forms/preferences";
 import { ProfessionalForm } from "../forms/professional.form";
+import { AvailabilityForm } from "../forms/availability.form";
 
 
 export const ProfileView = () => {
@@ -20,20 +21,18 @@ export const ProfileView = () => {
                 <Header />
                 <Tabs defaultValue="personal" className="space-y-6">
                     <TabsList className={cn(
-                        "grid w-full",
-                        session.data?.user.role === "CUSTOMER" ? "grid-cols-3" : "grid-cols-4"
+                        "grid w-full grid-cols-3",
                     )}>
-                        <TabsTrigger value="personal">Personal Info</TabsTrigger>
+                        <TabsTrigger className="md:cursor-pointer" value="personal">Personal Info</TabsTrigger>
                         {session.data?.user.role === "CUSTOMER" ? (
                             <>
-                                <TabsTrigger value="medical">Medical Records</TabsTrigger>
-                                <TabsTrigger value="preferences">Preferences</TabsTrigger>
+                                <TabsTrigger className="md:cursor-pointer" value="medical">Medical Records</TabsTrigger>
+                                <TabsTrigger className="md:cursor-pointer" value="preferences">Preferences</TabsTrigger>
                             </>
                         ) : (
                             <>
-                                <TabsTrigger value="professional">Professional</TabsTrigger>
-                                <TabsTrigger value="services">Services</TabsTrigger>
-                                <TabsTrigger value="availability">Availability</TabsTrigger>
+                                <TabsTrigger className="md:cursor-pointer" value="professional">Professional</TabsTrigger>
+                                <TabsTrigger className="md:cursor-pointer" value="availability">Availability</TabsTrigger>
                             </>
                         )}
                     </TabsList>
@@ -48,6 +47,9 @@ export const ProfileView = () => {
                     </TabsContent>
                     <TabsContent value="professional">
                         <ProfessionalForm />
+                    </TabsContent>
+                    <TabsContent value="availability">
+                        <AvailabilityForm />
                     </TabsContent>
                 </Tabs>
             </div>
