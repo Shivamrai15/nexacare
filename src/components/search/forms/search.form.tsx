@@ -45,7 +45,7 @@ export function SearchForm({ onSearch }: SearchFormProps) {
         defaultValues: {
             searchQuery: "",
             serviceType: "all-services",
-            sortBy: "rating",
+            sortBy: "None",
             priceRange: [10, 50],
         },
     });
@@ -141,15 +141,15 @@ export function SearchForm({ onSearch }: SearchFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className="text-card-foreground">
-                                        Price Range: ${field.value[0]} - ${field.value[1]}/hour
+                                        Price Range: ₹{field.value[0]} - ₹{field.value[1]}/hour
                                     </FormLabel>
                                     <FormControl>
                                         <Slider
                                             value={field.value}
                                             onValueChange={field.onChange}
-                                            max={50}
-                                            min={10}
-                                            step={5}
+                                            max={5000}
+                                            min={200}
+                                            step={100}
                                             className="w-full"
                                         />
                                     </FormControl>

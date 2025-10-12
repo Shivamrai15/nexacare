@@ -163,3 +163,11 @@ export const faqs = [
         answer: "We serve most major metropolitan areas and surrounding suburbs. Enter your zip code on our search page to see available caregivers in your area. We're constantly expanding our network to serve more communities."
     }
 ]
+
+
+export const CURRENCIES = [
+    { value: "INR", label: "₹ INR", symbol: "₹" },
+    { value: "USD", label: "$ USD", symbol: "$" },
+    { value: "EUR", label: "€ EUR", symbol: "€" },
+    { value: "GBP", label: "£ GBP", symbol: "£" },
+];

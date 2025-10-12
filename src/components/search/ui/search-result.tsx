@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CURRENCIES } from "@/lib/constant";
 
 interface Props {
     data: {
@@ -24,8 +25,9 @@ interface Props {
         verificationStatus: VerificationStatus;
         description?: string | null;
         averageRating?: number | null;
-        charges?: {
-            hourlyRate: number;
+        charges: {
+            visitFee: number | null;
+            currency: string;
         } | null;
         _count: {
             reviews: number;
@@ -33,7 +35,14 @@ interface Props {
     }[];
 }
 
+
+
 export const SearchResults = ({ data }: Props) => {
+
+    const getCurrencySymbol = (currency: string) => {
+        return CURRENCIES.find(c => c.value === currency)?.symbol || currency;
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -139,7 +148,7 @@ export const SearchResults = ({ data }: Props) => {
                                             {/* Right side: Price and Actions */}
                                             <div className="md:text-right md:ml-4 min-w-40">
                                                 <div className="text-2xl font-bold text-foreground mb-1">
-                                                    ${caregiver.charges?.hourlyRate || 0}
+                                                    {getCurrencySymbol(caregiver.charges?.currency?? "")} {caregiver.charges?.visitFee || 0}
                                                 </div>
                                                 <div className="text-sm text-muted-foreground mb-4">per hour</div>
                                                 <div className="flex flex-col gap-2">

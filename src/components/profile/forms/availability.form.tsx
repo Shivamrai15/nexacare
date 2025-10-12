@@ -56,6 +56,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { AvailabilitySchema, ChargesSchema } from "@/modules/user/schema";
+import { CURRENCIES } from "@/lib/constant";
 
 
 
@@ -73,12 +74,6 @@ const DAYS_OF_WEEK = [
     { value: "SUNDAY", label: "Sunday" },
 ];
 
-const CURRENCIES = [
-    { value: "INR", label: "₹ INR", symbol: "₹" },
-    { value: "USD", label: "$ USD", symbol: "$" },
-    { value: "EUR", label: "€ EUR", symbol: "€" },
-    { value: "GBP", label: "£ GBP", symbol: "£" },
-];
 
 export const AvailabilityForm = () => {
     const trpc = useTRPC();
