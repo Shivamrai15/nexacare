@@ -50,6 +50,7 @@ export const userRouter = createTRPCRouter({
 
         return user;
     }),
+
     updatePersonalInfo : protectedProcedure.input(PersonalInfoSchema).mutation(async({ctx, input})=>{
         const updatedUser = await db.user.update({
             where : {
@@ -81,6 +82,7 @@ export const userRouter = createTRPCRouter({
         });
         return updatedUser;
     }),
+
     createMedicalRecord : protectedProcedure.input(MedicalRecordSchema).mutation(async({ctx, input})=>{
         const medicalRecord =  await db.medicalRecord.create({
             data: {
@@ -106,6 +108,7 @@ export const userRouter = createTRPCRouter({
         }
         return medicalRecord;
     }),
+
     deleteMedicalRecord : protectedProcedure.input(z.object({
         recordId : z.string().min(1)
     })).mutation(async({ctx, input})=>{
@@ -133,6 +136,7 @@ export const userRouter = createTRPCRouter({
 
         return { success: true };
     }),
+
     updatePreferences : protectedProcedure.input(z.array(z.string())).mutation(async({ctx, input})=>{
         const updatedUser = await db.user.update({
             where : {
@@ -144,6 +148,7 @@ export const userRouter = createTRPCRouter({
         });
         return updatedUser;
     }),
+
     updateProfessionalInfo : protectedProcedure.input(CaregiverProfileSchema).mutation(async({ctx, input})=>{
         const updatedCaregiver = await db.caregiver.update({
             where : {
@@ -182,6 +187,7 @@ export const userRouter = createTRPCRouter({
 
         return updatedCaregiver;
     }),
+
     createCertificate : protectedProcedure.input(CertificateSchema).mutation(async({ctx, input})=>{
         const certificate = await db.certificate.create({
             data : {
@@ -207,6 +213,7 @@ export const userRouter = createTRPCRouter({
 
         return certificate;
     }),
+
     deleteCertificate : protectedProcedure.input(z.object({
         certificateId : z.string().min(1)
     })).mutation(async({ctx, input})=>{
@@ -233,6 +240,7 @@ export const userRouter = createTRPCRouter({
 
         return { success: true };
     }),
+
     createUpdateEmergencyContact : protectedProcedure.input(EmergencyContactSchema).mutation(async({ctx, input})=>{
         
         const caregiver = await db.caregiver.findUnique({
@@ -280,6 +288,7 @@ export const userRouter = createTRPCRouter({
         }
         return emergencyContact;
     }),
+
     createUpdateCharges : protectedProcedure.input(ChargesSchema).mutation(async({ctx, input})=>{
         const caregiver = await db.caregiver.findUnique({
             where : {
@@ -324,6 +333,7 @@ export const userRouter = createTRPCRouter({
         }
         return charges;
     }),
+
     createAvailabilitySlot : protectedProcedure.input(AvailabilitySchema).mutation(async({ctx, input})=>{
         const availability = await db.availability.create({
             data : {
@@ -345,6 +355,7 @@ export const userRouter = createTRPCRouter({
         }
         return availability;
     }),
+    
     deleteAvailabilitySlot : protectedProcedure.input(z.object({ slotId : z.string().min(1) })).mutation(async({ctx, input})=>{
         const slot = await db.availability.findFirst({
             where : {
