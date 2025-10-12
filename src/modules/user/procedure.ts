@@ -5,7 +5,13 @@ import {
     createTRPCRouter,
 } from "@/trpc/init";
 import { db } from "@/lib/db";
-import { MedicalRecordSchema, PersonalInfoSchema } from "./schema";
+import {
+    CertificateSchema,
+    PersonalInfoSchema,
+    MedicalRecordSchema,
+    CaregiverProfileSchema,
+    EmergencyContactSchema,
+} from "./schema";
 
 export const userRouter = createTRPCRouter({
     getProfile : protectedProcedure.query(async({ctx})=>{
@@ -134,4 +140,116 @@ export const userRouter = createTRPCRouter({
         });
         return updatedUser;
     }),
-});
+    updateProfessionalInfo : protectedProcedure.input(CaregiverProfileSchema).mutation(async({ctx, input})=>{
+        const updatedCaregiver = await db.caregiver.update({
+            where : {
+                userId : ctx.userId
+            },
+            data : {
+                description : input.description,
+                experience : input.experience,
+                languages : input.languages,
+                specializations : input.specializations,
+            }
+        });
+        return updatedCaregiver;
+    }),
+    createCertificate : protectedProcedure.input(CertificateSchema).mutation(async({ctx, input})=>{
+        const certificate = await db.certificate.create({
+            data : {
+                title : input.title,
+                issuingBody : input.issuingBody,
+                issueDate : new Date(input.issueDate),
+                expiryDate : input.expiryDate ? new Date(input.expiryDate) : undefined,
+                certificateUrl : input.certificateUrl,
+                caregiver : {
+                    connect : {
+                        userId : ctx.userId
+                    }
+                }
+            }
+        });
+
+        if (!certificate) {
+            throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Failed to create certificate",
+            });
+        }
+
+        return certificate;
+    }),
+    deleteCertificate : protectedProcedure.input(z.object({
+        certificateId : z.string().min(1)
+    })).mutation(async({ctx, input})=>{
+        const certificate = await db.certificate.findFirst({
+            where : {
+                id : input.certificateId,
+                caregiver : {
+                    userId : ctx.userId
+                }
+            }
+        });
+        if (!certificate) {
+            throw new TRPCError({
+                code: "NOT_FOUND",
+                message: "Certificate not found",
+            });
+        }
+
+        await db.certificate.delete({
+            where: {
+                id: input.certificateId,
+            },
+        });
+
+        return { success: true };
+    }),
+    createUpdateEmergencyContact : protectedProcedure.input(EmergencyContactSchema).mutation(async({ctx, input})=>{
+        
+        const caregiver = await db.caregiver.findUnique({
+            where : {
+                userId : ctx.userId
+            },
+            select : {
+                id : true
+            }
+        });
+
+        if (!caregiver) {
+            throw new TRPCError({
+                code: "BAD_REQUEST",
+                message: "Caregiver profile not found. Please complete your professional profile first.",
+            });
+        }
+        
+        const emergencyContact = await db.emergencyContact.upsert({
+            where : {
+                caregiverId : caregiver.id
+            },
+            create : {
+                name : input.name,
+                relationship : input.relationship,
+                contactNumber : input.contactNumber,
+                caregiver : {
+                    connect : {
+                        userId : ctx.userId
+                    }
+                }
+            },
+            update : {
+                name : input.name,
+                relationship : input.relationship,
+                contactNumber : input.contactNumber
+            }
+        })
+
+        if (!emergencyContact) {
+            throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Failed to save emergency contact",
+            });
+        }
+        return emergencyContact;
+    })
+})

@@ -7,6 +7,7 @@ import { PersonalForm } from "../forms/personal.form";
 import { cn } from "@/lib/utils";
 import { MedicalForm } from "../forms/medical.form";
 import { Preferences } from "../forms/preferences";
+import { ProfessionalForm } from "../forms/professional.form";
 
 
 export const ProfileView = () => {
@@ -20,7 +21,7 @@ export const ProfileView = () => {
                 <Tabs defaultValue="personal" className="space-y-6">
                     <TabsList className={cn(
                         "grid w-full",
-                        session.data?.user.role === "CUSTOMER" ? "md:grid-cols-3" : "md:grid-cols-4"
+                        session.data?.user.role === "CUSTOMER" ? "grid-cols-3" : "grid-cols-4"
                     )}>
                         <TabsTrigger value="personal">Personal Info</TabsTrigger>
                         {session.data?.user.role === "CUSTOMER" ? (
@@ -44,6 +45,9 @@ export const ProfileView = () => {
                     </TabsContent>
                     <TabsContent value="preferences">
                         <Preferences />
+                    </TabsContent>
+                    <TabsContent value="professional">
+                        <ProfessionalForm />
                     </TabsContent>
                 </Tabs>
             </div>

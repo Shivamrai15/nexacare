@@ -134,37 +134,6 @@ export const PersonalForm = () => {
                                     )}
                                 />
                             </div>
-
-                            {
-                                profile.role === "CAREGIVER" && (
-                                    <FormField
-                                        control={form.control}
-                                        name="bio"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="text-sm font-medium">
-                                                    Bio
-                                                </FormLabel>
-                                                <FormControl>
-                                                    <Textarea
-                                                        placeholder="Tell us a little about yourself..."
-                                                        className="min-h-[100px] resize-none rounded-lg"
-                                                        {...field}
-                                                        disabled={isSubmitting}
-                                                    />
-                                                </FormControl>
-                                                <FormDescription className="text-xs flex justify-between">
-                                                    <span>Optional - Share a brief description about yourself</span>
-                                                    <span className="text-muted-foreground">
-                                                        {field.value?.length || 0}/500
-                                                    </span>
-                                                </FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                )
-                            }
                         </div>
                         <div className="space-y-4 pt-2">
                             <div className="flex items-center gap-2 pb-2">
