@@ -53,7 +53,7 @@ export const SearchView = () => {
                                 <div className="text-6xl mb-4">😔</div>
                                 <h3 className="text-lg font-semibold mb-2">No Results Found</h3>
                                 <p className="text-sm text-muted-foreground">
-                                    Try adjusting your search or filter to find what you're looking for.
+                                    Try adjusting your search or filter to find what you&apos;re looking for.
                                 </p>
                             </div>
                         </div>

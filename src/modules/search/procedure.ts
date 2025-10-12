@@ -95,7 +95,7 @@ export const searchRouter = createTRPCRouter({
             };
         });
 
-        let sortedCaregivers = [...caregiversWithRating];
+        const sortedCaregivers = [...caregiversWithRating];
 
         switch (input.sortBy) {
             case "rating":
