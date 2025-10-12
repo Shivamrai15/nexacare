@@ -122,5 +122,16 @@ export const userRouter = createTRPCRouter({
         });
 
         return { success: true };
-    })
+    }),
+    updatePreferences : protectedProcedure.input(z.array(z.string())).mutation(async({ctx, input})=>{
+        const updatedUser = await db.user.update({
+            where : {
+                id : ctx.userId
+            },
+            data : {
+                preferences : input
+            }
+        });
+        return updatedUser;
+    }),
 });

@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { PersonalForm } from "../forms/personal.form";
 import { cn } from "@/lib/utils";
 import { MedicalForm } from "../forms/medical.form";
+import { Preferences } from "../forms/preferences";
 
 
 export const ProfileView = () => {
@@ -40,6 +41,9 @@ export const ProfileView = () => {
                     </TabsContent>
                     <TabsContent value="medical">
                         <MedicalForm />
+                    </TabsContent>
+                    <TabsContent value="preferences">
+                        <Preferences />
                     </TabsContent>
                 </Tabs>
             </div>
