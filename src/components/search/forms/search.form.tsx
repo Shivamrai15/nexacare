@@ -46,7 +46,7 @@ export function SearchForm({ onSearch }: SearchFormProps) {
             searchQuery: "",
             serviceType: "all-services",
             sortBy: "None",
-            priceRange: [10, 50],
+            priceRange: [200, 5000],
         },
     });
 
@@ -124,6 +124,7 @@ export function SearchForm({ onSearch }: SearchFormProps) {
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
+                                            <SelectItem value="None">None</SelectItem>
                                             <SelectItem value="rating">Highest Rated</SelectItem>
                                             <SelectItem value="price-low">Price: Low to High</SelectItem>
                                             <SelectItem value="price-high">Price: High to Low</SelectItem>
