@@ -48,7 +48,6 @@ export const PersonalForm = () => {
         resolver : zodResolver(PersonalInfoSchema),
         defaultValues: {
             name : profile.name || "",
-            bio : profile.bio || "",
             contactNumber : profile.contactNumber || "",
             street : profile.address?.street || "",
             city : profile.address?.city || "",
