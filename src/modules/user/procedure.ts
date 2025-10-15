@@ -16,6 +16,7 @@ import {
 } from "./schema";
 import { qdarnt } from "@/lib/qdrant";
 import { generateEmbeddings } from "@/lib/embedding";
+import { v4 as uuidv4 } from "uuid";
 
 export const userRouter = createTRPCRouter({
     getProfile : protectedProcedure.query(async({ctx})=>{
@@ -48,6 +49,23 @@ export const userRouter = createTRPCRouter({
             });
         }
 
+        if (user.role === "CAREGIVER" && !user.caregiver) {
+            await db.caregiver.create({
+                data : {
+                    userId : user.id,
+                    vectorId : uuidv4(),
+                }
+            });
+        }
+
+        if (user.role === "CUSTOMER" && !user.customer) {
+            await db.customer.create({
+                data : {
+                    userId : user.id,
+                }
+            });
+        }
+
         return user;
     }),
 
@@ -59,7 +77,6 @@ export const userRouter = createTRPCRouter({
             data : {
                 name : input.name,
                 contactNumber : input.contactNumber,
-                bio : input.bio,
                 address : {
                     upsert : {
                         create : {

@@ -2,8 +2,6 @@
 
 import * as z from "zod";
 import Link from "next/link";
-import { useTRPC } from "@/trpc/client";
-import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { SignUpSchema } from "@/modules/auth/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,21 +20,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
 
 
 export const SignUpForm = () => {
-
-    const trpc = useTRPC();
-
-    const createUser = useMutation(trpc.auth.signUp.mutationOptions({
-        onSuccess : ()=>{
-            form.reset();
-            toast.success("Account created successfully! Please check your email to verify your account.");
-        },
-        onError : (error) => {
-            toast.error(error.message || "Something went wrong. Please try again.");
-        }
-    }))
         
     const form = useForm<z.infer<typeof SignUpSchema>>({
         resolver : zodResolver(SignUpSchema),
@@ -51,7 +38,15 @@ export const SignUpForm = () => {
     const isSubmitting = form.formState.isSubmitting;
 
     const onSubmit = async (data: z.infer<typeof SignUpSchema>) => {
-        await createUser.mutateAsync(data);
+        await authClient.signUp.email(data, {
+            onSuccess : ()=>{
+                form.reset();
+                toast.success("Please check your email to verify your account.");
+            },
+            onError : (ctx)=>{
+                toast.error(ctx.error.message);
+            }
+        })
     }
     
     return (

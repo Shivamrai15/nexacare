@@ -2,8 +2,6 @@
 
 import * as z from "zod";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useTRPC } from "@/trpc/client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoginSchema } from "@/modules/auth/schemas";
@@ -19,28 +17,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useMutation } from "@tanstack/react-query";
+import { authClient } from "@/lib/auth-client";
 
 
 export const SignInForm = () => {
-
-    const trpc = useTRPC();
-    const router = useRouter();
-
-    const loggedInUser = useMutation(trpc.auth.signIn.mutationOptions({
-        onSuccess : ()=>{
-            form.reset();
-            toast.success("Logged in successfully!");
-            router.push("/");
-        },
-        onError : (error) => {
-            if (error.message === "NEXT_REDIRECT"){
-                window.location.reload();
-                return;
-            }
-            toast.error(error.message || "Something went wrong. Please try again.");
-        }
-    }))
 
     const form = useForm<z.infer<typeof LoginSchema>>({
         resolver: zodResolver(LoginSchema),
@@ -53,7 +33,26 @@ export const SignInForm = () => {
     const { isSubmitting } = form.formState;
 
     const onSubmit = async (data : z.infer<typeof LoginSchema>) => {
-        await loggedInUser.mutateAsync(data);
+        await authClient.signIn.email(
+            {
+                ...data,
+                callbackURL : "/"
+            },
+            {
+                onSuccess : ()=>{
+                    form.reset();
+                    toast.success("Logged in successfully!");
+                },
+                onError : async (ctx)=>{
+                    if(ctx.error.status === 403) {
+                        await authClient.sendVerificationEmail(data);
+                        toast.info("Please verify your email address");
+                        return;
+                    }
+                    toast.error(ctx.error.message);
+                }
+            }
+        );
     }
 
     return (

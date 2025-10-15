@@ -1,6 +1,5 @@
-import { auth } from "@/lib/auth";
 import Image from "next/image";
-import { redirect } from "next/navigation";
+import { requireUnAuth } from "@/lib/auth-utils";
 
 interface Props {
     children: React.ReactNode;
@@ -8,10 +7,7 @@ interface Props {
 
 const LayoutPage = async ({ children }: Props) => {
     
-    const session = await auth();
-    if (session) {
-        return redirect("/");
-    }
+    await requireUnAuth()
     
     return (
         <div className="w-full h-full flex">

@@ -1,8 +1,9 @@
 "use client";
 
+import { useTRPC } from "@/trpc/client";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Header } from "./header";
-import { useSession } from "next-auth/react";
 import { PersonalForm } from "../forms/personal.form";
 import { cn } from "@/lib/utils";
 import { MedicalForm } from "../forms/medical.form";
@@ -13,7 +14,8 @@ import { AvailabilityForm } from "../forms/availability.form";
 
 export const ProfileView = () => {
 
-    const session = useSession();
+    const trpc = useTRPC();
+    const { data: profile } = useSuspenseQuery(trpc.user.getProfile.queryOptions());
    
     return (
         <div className="container mx-auto px-4 py-8">
@@ -24,7 +26,7 @@ export const ProfileView = () => {
                         "grid w-full grid-cols-3",
                     )}>
                         <TabsTrigger className="md:cursor-pointer" value="personal">Personal Info</TabsTrigger>
-                        {session.data?.user.role === "CUSTOMER" ? (
+                        {profile.role === "CUSTOMER" ? (
                             <>
                                 <TabsTrigger className="md:cursor-pointer" value="medical">Medical Records</TabsTrigger>
                                 <TabsTrigger className="md:cursor-pointer" value="preferences">Preferences</TabsTrigger>

@@ -13,16 +13,16 @@ export const Header = () => {
     return (
         <div className="flex items-center space-x-4 mb-8">
             <div className="relative">
-              <Avatar className="h-20 w-20">
-                <AvatarImage src={profile.image || "/assets/placeholder.svg"} alt="Profile" />
-                <AvatarFallback className="text-lg">
-                  {profile.name[0]}
-                </AvatarFallback>
-              </Avatar>
-              <label className="absolute bottom-0 right-0 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-full p-1 cursor-pointer">
-                <input type="file" accept="image/*" className="hidden" />
-                <span className="text-xs px-2">📷</span>
-              </label>
+                <Avatar className="h-20 w-20">
+                    <AvatarImage src={profile.image || "/assets/placeholder.svg"} alt="Profile" />
+                    <AvatarFallback className="text-lg">
+                        {profile.name[0]}
+                    </AvatarFallback>
+                </Avatar>
+                <label className="absolute bottom-0 right-0 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-full p-1 cursor-pointer">
+                    <input type="file" accept="image/*" className="hidden" />
+                    <span className="text-xs px-2">📷</span>
+                </label>
             </div>
             <div>
                 <h1 className="text-3xl font-bold text-foreground">

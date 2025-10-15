@@ -1,6 +1,5 @@
 import { Header } from "@/components/usable/header";
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+import { requireAuth } from "@/lib/auth-utils";
 
 interface Props {
     children: React.ReactNode;
@@ -8,14 +7,11 @@ interface Props {
 
 const Layout = async({ children }: Props) => {
 
-    const session = await auth();
-    if (!session) {
-        return redirect("/");
-    }
+    const session = await requireAuth();
 
     return (
         <>
-            <Header />
+            <Header user={session.user} />
             {children}
         </>
     )

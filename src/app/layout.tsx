@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
-import { Catamaran } from "next/font/google";
-import { SessionProvider } from "next-auth/react";
+import { Merriweather } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
-import { auth } from "@/lib/auth";
 import { TRPCReactProvider } from "@/trpc/client";
 
-const font = Catamaran({
+const font = Merriweather({
     subsets: ["latin"],
-    weight: ["100", "200", "300","400", "500", "600", "700", "800", "900"],
+    weight: ["300","400", "500", "600", "700", "800", "900"],
 })
 
 export const metadata: Metadata = {
@@ -84,31 +82,26 @@ export const metadata: Metadata = {
     category: "Healthcare",
 };
 
-export default async function RootLayout({
+export default function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
 
-     const session = await auth();
-
     return (
         <html lang="en" suppressHydrationWarning>
-            <SessionProvider session={session}>
-                <TRPCReactProvider>
-
-                    <body
-                        className={`${font.className} antialiased relative`}
-                    >
-                        <Toaster
-                            position="top-right"
-                            richColors
-                        />
-                        {/* <ModalProvider /> */}
-                        {children}
-                    </body>
-                </TRPCReactProvider>
-            </SessionProvider>
+            <TRPCReactProvider>
+                <body
+                    className={`${font.className} antialiased relative`}
+                >
+                    <Toaster
+                        position="top-right"
+                        richColors
+                    />
+                    {/* <ModalProvider /> */}
+                    {children}
+                </body>
+            </TRPCReactProvider>
         </html>
     );
 }

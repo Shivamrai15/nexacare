@@ -1,45 +1,36 @@
-import NextAuth from "next-auth";
-import { UserRole } from "@/generated/prisma";
-import { PrismaAdapter } from "@auth/prisma-adapter";
+import { betterAuth } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
+import { db } from "./db";
+import { sendEmailVerification } from "./email";
 
-import { db } from "@/lib/db";
-import authConfig from "@/lib/auth.config";
-import { getUserById } from "./user";
- 
-export const {
-    handlers,
-    signIn,
-    signOut,
-    auth
-} = NextAuth({
-    pages: {
-        signIn: "/login",
-        error: "/auth/error"
+export const auth = betterAuth({
+    database: prismaAdapter(db, {
+        provider: "mongodb",
+    }),
+    emailAndPassword: { 
+        enabled: true,
+        requireEmailVerification : true
     },
-    callbacks :{
-        async session({session, token}) {
-            if (token.sub && session.user) {
-                session.user.id = token.sub;
-            }
-            if (token.role && session.user) {
-                session.user.role = token.role as UserRole;
-            }
-
-            return session;
+    emailVerification : {
+        sendVerificationEmail : async({ token, url, user }) => {
+            await sendEmailVerification(user.email, user.name, url);
         },
-        async jwt({token}){
-            const existingUser = await getUserById(token.sub||"");
-
-            if (!existingUser) return token;
-            token.name = existingUser.name;
-            token.email = existingUser.email;
-            token.role = existingUser.role;
-
-            return token;
+        autoSignInAfterVerification: true
+    },
+    advanced : {
+        database : {
+            generateId : false
+        },
+    },
+    user : {
+        additionalFields : {
+            role : {
+                type : "string",
+                fieldName : "role",
+                defaultValue: "CUSTOMER",
+                input: true,
+                required : true,
+            }
         }
     },
-
-    adapter: PrismaAdapter(db),
-    session: { strategy: "jwt" },
-    ...authConfig,
-})
+});

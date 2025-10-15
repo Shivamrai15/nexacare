@@ -1,17 +1,34 @@
 "use client";
 
-import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "../ui/button";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-export const Header = () => {
+interface Props {
+    user: {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        email: string;
+        emailVerified: boolean;
+        name: string;
+        image?: string | null | undefined | undefined;
+        role: string;
+    } | null;
+}
+
+export const Header = ({ user }: Props) => {
 
 
-    const session  = useSession();
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
+
 
     const getNavigationItems = () => {
-        if (!session || session.status !== "authenticated") {
+        if (!user) {
             return [
                 { href: "/", label: "Home" },
                 { href: "/search", label: "Find Care" },
@@ -19,7 +36,7 @@ export const Header = () => {
             ]
         }
 
-        if (session.data.user.role === 'CAREGIVER') {
+        if (user.role === 'CAREGIVER') {
             return [
                 { href: "/", label: "Home" },
                 { href: "/profile", label: "My Profile" },
@@ -34,6 +51,18 @@ export const Header = () => {
                 { href: "/history", label: "History" },
             ]
         }
+    }
+
+    const handleLogOut = async() => {
+        setIsLoading(true);
+        await authClient.signOut({
+            fetchOptions: {
+                onSuccess: () => {
+                    router.replace("/");
+                },
+            },
+        });
+        setIsLoading(false);
     }
 
     return (
@@ -61,7 +90,7 @@ export const Header = () => {
                     ))}
                 </nav>
                 {
-                    session.status === "unauthenticated" && (
+                    !user && (
                         <div className="flex items-center space-x-3">
                             <Link href="/sign-in">
                                 <Button variant="ghost" className="rounded-lg">
@@ -77,11 +106,12 @@ export const Header = () => {
                     )
                 }
                 {
-                    session.status === "authenticated" && (
+                    user && (
                         <Button
                             size="sm"
                             className="rounded-lg"
-                            onClick={async()=>await signOut()}
+                            onClick={handleLogOut}
+                            disabled={isLoading}
                         >
                             Logout
                         </Button>

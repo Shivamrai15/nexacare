@@ -1,11 +1,12 @@
-import { cache } from "react";
 import superjson from "superjson";
-import { auth } from "@/lib/auth";
+import { cache } from "react";
 import { initTRPC, TRPCError } from "@trpc/server";
+import { getSession } from "@/lib/auth-utils";
+import { UserRole } from "@/generated/prisma";
 
 export const createTRPCContext = cache(async() => {
     return {
-        auth : await auth()
+        auth : await getSession()
     };
 });
 
@@ -26,7 +27,7 @@ const isAuthenticated = t.middleware(({ ctx, next }) => {
         ctx: {
             ...ctx,
             userId: ctx.auth.user.id,
-            userRole: ctx.auth.user.role
+            userRole: ctx.auth.user.role as UserRole
         }
     });
 })
